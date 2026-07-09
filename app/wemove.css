@@ -1,0 +1,40 @@
+/* WeMove × Botnoi custom styles */
+
+:root {
+  --bg-main: #f0f7ff;
+  --bg-card: #fc2a2a;
+  --text-primary: #0f172a;
+  --text-muted: #64748b;
+  --color-emerald: #10b981;
+  --color-rose: #f43f5e;
+  --color-amber: #f59e0b;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+}
+
+.custom-sidebar {
+  background-color: var(--bg-card);
+  border-color: #e2e8f0;
+}
+
+.text-brand-title {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.active-menu {
+  background-color: #e72b2b !important;
+  color: #ffffff !important;
+}
+
+.active-menu i {
+  color: #ff7373 !important;
+}
+
+.bg-white nav button:hover {
+  background-color: #f4c5c5 !important;
+  color: #fa3636 !important;
+}
