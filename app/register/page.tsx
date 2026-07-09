@@ -4,6 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { register, ApiError } from "@/lib/api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CAR_TYPES = [
   { value: "pickup", label: "กระบะ (Pickup)" },
@@ -146,14 +153,15 @@ export default function RegisterPage() {
               <label className="text-[11px] text-slate-500 font-bold uppercase block mb-1.5">
                 สมัครเป็น
               </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as "driver" | "shipper")}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-slate-400 focus:bg-white transition-all text-slate-700"
-              >
-                <option value="driver">คนขับรถ (Driver)</option>
-                <option value="shipper">ผู้ส่งสินค้า (Shipper)</option>
-              </select>
+              <Select value={role} onValueChange={(v) => setRole(v as "driver" | "shipper")}>
+                <SelectTrigger className="h-auto w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-slate-400">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="driver">คนขับรถ (Driver)</SelectItem>
+                  <SelectItem value="shipper">ผู้ส่งสินค้า (Shipper)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {role === "driver" ? (
@@ -175,17 +183,18 @@ export default function RegisterPage() {
                   <label className="text-[11px] text-slate-500 font-bold uppercase block mb-1.5">
                     ประเภทรถ
                   </label>
-                  <select
-                    value={carType}
-                    onChange={(e) => setCarType(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-slate-400 focus:bg-white transition-all text-slate-700"
-                  >
-                    {CAR_TYPES.map((c) => (
-                      <option key={c.value} value={c.value}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={carType} onValueChange={setCarType}>
+                    <SelectTrigger className="h-auto w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-slate-400">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CAR_TYPES.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </>
             ) : (
