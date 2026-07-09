@@ -18,7 +18,8 @@ const navItems: NavItem[] = [
   { href: "/tracking", icon: "fa-map-location-dot", label: "Tracking" },
 ];
 
-function initialsOf(name: string) {
+function initialsOf(name: string | null | undefined) {
+  if (!name) return "?";
   const parts = name.trim().split(/\s+/);
   return parts
     .slice(0, 2)
@@ -76,7 +77,7 @@ export default function AdminSidebar() {
       <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-white flex-shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 text-sm border border-slate-200 flex-shrink-0">
-            {user ? initialsOf(user.fullName) : "?"}
+            {initialsOf(user?.fullName)}
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold text-slate-700 truncate">
