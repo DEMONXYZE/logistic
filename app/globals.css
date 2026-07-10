@@ -12,6 +12,12 @@
   --popover-foreground: #334155;
   --accent: #f1f5f9;
   --accent-foreground: #0f172a;
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --destructive: #e11d48;
+  --destructive-foreground: #ffffff;
 }
 
 @theme inline {
@@ -25,6 +31,12 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --font-sans: var(--font-k2d);
 }
 

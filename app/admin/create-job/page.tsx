@@ -1,20 +1,38 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useRequireAuth } from "@/lib/use-require-auth";
 // 🌟 แก้ไข Path ให้ถอยออกไปหาโฟลเดอร์ components ด้านนอกตรง ๆ
 import { Calendar } from "../../../components/ui/calendar";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
-import { Clock } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../components/ui/select";
+import { ArrowLeft, Clock } from "lucide-react";
+
+const CARGO_TYPES = [
+  { value: "สินค้าอุปโภคบริโภค", label: "สินค้าอุปโภคบริโภค" },
+  { value: "ชิ้นส่วนอิเล็กทรอนิกส์", label: "ชิ้นส่วนอิเล็กทรอนิกส์" },
+  { value: "วัสดุก่อสร้าง", label: "วัสดุก่อสร้าง" },
+];
 
 export default function CreateJobPage() {
+  const router = useRouter();
+  const { user, loading } = useRequireAuth();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState("12:00:00");
 
   const [formData, setFormData] = useState({
     origin: "",
     destination: "",
-    cargoType: "",
+    cargoType: CARGO_TYPES[0].value,
     price: "",
     notes: "",
   });
@@ -36,13 +54,23 @@ export default function CreateJobPage() {
 
     console.log("ข้อมูลที่ลงประกาศจ้างงาน:", finalData);
     alert("ลงประกาศจ้างงานสำเร็จเรียบร้อยแล้ว! งานจะถูกส่งไปที่หน้ารับงานของคนขับ");
+    router.push("/dashboard");
   };
+
+  if (loading || !user) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-8">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
         
         <div className="mb-8 border-b border-gray-100 pb-4">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition mb-3"
+          >
+            <ArrowLeft size={16} strokeWidth={2} />
+            กลับไปหน้า Dashboard
+          </Link>
           <h1 className="text-2xl font-bold text-gray-900">ลงประกาศจ้างงานขนส่ง</h1>
           <p className="text-gray-500 text-sm mt-1">กรุณากรอกรายละเอียดงานและเลือกวันเวลาเดินทางให้ครบถ้วน</p>
         </div>
@@ -81,18 +109,21 @@ export default function CreateJobPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">ประเภทสินค้า</label>
-                <select
-                  name="cargoType"
-                  required
+                <Select
                   value={formData.cargoType}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition"
+                  onValueChange={(v) => setFormData((prev) => ({ ...prev, cargoType: v }))}
                 >
-                  <option value="">-- เลือกประเภท --</option>
-                  <option value="สินค้าอุปโภคบริโภค">สินค้าอุปโภคบริโภค</option>
-                  <option value="ชิ้นส่วนอิเล็กทรอนิกส์">ชิ้นส่วนอิเล็กทรอนิกส์</option>
-                  <option value="วัสดุก่อสร้าง">วัสดุก่อสร้าง</option>
-                </select>
+                  <SelectTrigger className="h-auto w-full rounded-lg border-gray-200 bg-gray-50 px-4 py-2.5 focus:ring-2 focus:ring-red-500 focus:bg-white">
+                    <SelectValue placeholder="-- เลือกประเภท --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CARGO_TYPES.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">ค่าจ้างเที่ยวนี้ (บาท)</label>
