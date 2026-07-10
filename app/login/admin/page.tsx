@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
               อีเมลผู้ใช้งาน (Email)
             </label>
             <div className="relative">
-              <i className="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-400" />
+              <i className="fa-solid fa-envelope absolute left-4 top-4.5 text-slate-400" />
               <input
                 type="email"
                 placeholder="user@wemove.com"
@@ -93,6 +93,7 @@ export default function AdminLoginPage() {
             disabled={submitting}
             className="w-full py-3.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-md text-sm mt-2"
           >
+          <i className="fa-solid fa-right-to-bracket mr-2" />
             {submitting ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบผู้ใช้งาน"}
           </button>
         </form>

@@ -57,7 +57,7 @@ export default function DriverLoginPage() {
               เบอร์โทรศัพท์มือถือ
             </label>
             <div className="relative">
-              <i className="fa-solid fa-phone absolute left-4 top-4 text-slate-400" />
+              <i className="fa-solid fa-phone absolute left-4 top-5 text-slate-400" />
               <input
                 type="tel"
                 placeholder="09X-XXX-XXXX"
@@ -69,11 +69,11 @@ export default function DriverLoginPage() {
             </div>
           </div>
           <div>
-            <label className="text-[11px] text-slate-500 font-bold uppercase block mb-1">
+            <label className="text-[11px] text-slate-500 font-bold uppercase block mb-1.5">
               รหัสผ่านพนักงาน
             </label>
             <div className="relative">
-              <i className="fa-solid fa-key absolute left-4 top-3.5 text-slate-400" />
+              <i className="fa-solid fa-key absolute left-4 top-4.5 text-slate-400" />
               <input
                 type="password"
                 placeholder="••••••••"
@@ -87,9 +87,9 @@ export default function DriverLoginPage() {
           <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-md text-base mt-2 flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-md text-sm mt-2"
             >
-            <i className="fa-solid fa-right-to-bracket" />
+            <i className="fa-solid fa-right-to-bracket mr-2" />
             {submitting ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบพนักงานขับรถ"}
           </button>
         </form>
