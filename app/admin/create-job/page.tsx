@@ -39,6 +39,7 @@ export default function CreateJobPage() {
 
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -67,11 +68,10 @@ export default function CreateJobPage() {
         price: formData.price ? Number(formData.price) : undefined,
         jobDatetime,
       });
-      alert("ลงประกาศจ้างงานสำเร็จเรียบร้อยแล้ว! งานจะถูกส่งไปที่หน้ารับงานของคนขับ");
-      router.push("/dashboard");
+      setSuccess(true);
+      setTimeout(() => router.push("/dashboard"), 1500);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
-    } finally {
       setSubmitting(false);
     }
   };
@@ -100,6 +100,13 @@ export default function CreateJobPage() {
           </div>
         )}
 
+        {success ? (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold rounded-xl px-4 py-8 text-center">
+            ลงประกาศจ้างงานสำเร็จเรียบร้อยแล้ว! งานจะถูกส่งไปที่หน้ารับงานของคนขับ
+            <br />
+            กำลังพาไปหน้า Dashboard...
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
           {/* ฝั่งซ้าย: ข้อมูลรายละเอียดเส้นทางและสินค้า */}
@@ -256,6 +263,7 @@ export default function CreateJobPage() {
           </div>
 
         </form>
+        )}
       </div>
     </div>
   );

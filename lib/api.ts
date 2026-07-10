@@ -110,8 +110,10 @@ export function createJob(token: string, payload: CreateJobPayload) {
   }) as Promise<Job>;
 }
 
-export function listJobs(token: string) {
-  return apiFetch<Job[]>("/api/v1/jobs", {
+export function listJobs(token: string, params?: { page?: number; limit?: number }) {
+  const entries = Object.entries(params ?? {}).map(([k, v]) => [k, String(v)]);
+  const query = entries.length > 0 ? `?${new URLSearchParams(entries).toString()}` : "";
+  return apiFetch<Job[]>(`/api/v1/jobs${query}`, {
     headers: { Authorization: `Bearer ${token}` },
   }) as Promise<Job[]>;
 }

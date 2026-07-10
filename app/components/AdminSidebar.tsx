@@ -8,6 +8,7 @@ const navItems: NavItem[] = [
   { href: "#", icon: "fa-microphone-lines", label: "ประวัติสายโทร Voice AI" },
   { href: "#", icon: "fa-gear", label: "ตั้งค่าเสียงบอท (Settings)" },
   { href: "/tracking", icon: "fa-map-location-dot", label: "Tracking" },
+  { href: "/admin/jobs", icon: "fa-boxes-stacked", label: "งานขนส่งทั้งหมด" },
   { href: "/admin/create-job", icon: "fa-file-pen", label: "สร้างประกาศจ้างงาน" },
 ];
 

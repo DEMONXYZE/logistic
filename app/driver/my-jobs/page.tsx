@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DriverSidebar from "@/app/components/DriverSidebar";
+import { NotificationBell } from "@/app/components/NotificationBell";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import {
   listMyAssignments,
@@ -104,6 +105,7 @@ export default function DriverMyJobsPage() {
               งานที่คุณรับไว้ อัปเดตสถานะการจัดส่งได้จากตรงนี้
             </p>
           </div>
+          <NotificationBell />
         </header>
 
         <div className="p-6 md:p-8">

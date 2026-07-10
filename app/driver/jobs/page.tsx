@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import DriverSidebar from "@/app/components/DriverSidebar";
+import { NotificationBell } from "@/app/components/NotificationBell";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import {
   listMyOffers,
@@ -102,6 +103,7 @@ export default function DriverJobsPage() {
               รายการงานที่มีคนเสนอมาให้คุณโดยตรง กดรับหรือปฏิเสธได้เลย
             </p>
           </div>
+          <NotificationBell />
         </header>
 
         <div className="p-6 md:p-8">
@@ -169,44 +171,44 @@ export default function DriverJobsPage() {
                     </div>
                   </div>
 
-                  <div className="mt-6 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100 flex items-center justify-between md:justify-end gap-4">
+                  <div className="mt-6 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100 flex flex-wrap items-center justify-between md:justify-end gap-3">
                     <div className="text-left md:text-right">
                       <p className="text-xs text-gray-400 uppercase tracking-wider">ค่าจ้างเที่ยวนี้</p>
-                      <p className="text-2xl font-black text-red-600">
+                      <p className="text-2xl font-black text-red-600 whitespace-nowrap">
                         {offer.job?.price ? `${offer.job.price.toLocaleString()} บาท` : "-"}
                       </p>
                     </div>
 
                     {confirmingRejectId === offer.id ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={() => setConfirmingRejectId(null)}
                           disabled={actioningId === offer.id}
-                          className="text-xs font-bold text-gray-500 hover:text-gray-700 disabled:opacity-60 border border-gray-200 hover:bg-gray-50 px-3 py-2 rounded-lg transition-all"
+                          className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-4 py-3 rounded-lg transition disabled:opacity-60 whitespace-nowrap"
                         >
                           ไม่ปฏิเสธ
                         </button>
                         <button
                           onClick={() => handleReject(offer.id)}
                           disabled={actioningId === offer.id}
-                          className="text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-60 px-3 py-2 rounded-lg transition-all"
+                          className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-5 py-3 rounded-lg shadow-sm transition disabled:opacity-60 whitespace-nowrap"
                         >
                           {actioningId === offer.id ? "กำลังปฏิเสธ..." : "ยืนยันปฏิเสธ"}
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={() => setConfirmingRejectId(offer.id)}
                           disabled={actioningId === offer.id}
-                          className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-4 py-3 rounded-lg transition disabled:opacity-60"
+                          className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-4 py-3 rounded-lg transition disabled:opacity-60 whitespace-nowrap"
                         >
                           ปฏิเสธ
                         </button>
                         <button
                           onClick={() => handleAccept(offer.id)}
                           disabled={actioningId === offer.id}
-                          className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg shadow-sm transition active:scale-95 disabled:opacity-60"
+                          className="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-3 rounded-lg shadow-sm transition active:scale-95 disabled:opacity-60 whitespace-nowrap"
                         >
                           {actioningId === offer.id ? "กำลังรับงาน..." : "กดรับงาน"}
                         </button>

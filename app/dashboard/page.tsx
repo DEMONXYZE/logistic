@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import AdminSidebar from "@/app/components/AdminSidebar";
+import { NotificationBell } from "@/app/components/NotificationBell";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import { listJobs, ApiError, type Job } from "@/lib/api";
 import {
@@ -30,9 +31,10 @@ export default function DashboardPage() {
       .finally(() => setJobsLoading(false));
   }, [token]);
 
-  const latestJob = jobs.length > 0
-    ? jobs.reduce((a, b) => (new Date(a.createdAt) > new Date(b.createdAt) ? a : b))
-    : null;
+  const sortedJobs = [...jobs].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  const latestJob = sortedJobs[0] ?? null;
 
   if (loading || !user || !ADMIN_ROLES.includes(user.role)) return null;
 
@@ -48,6 +50,7 @@ export default function DashboardPage() {
               ระบบวิเคราะห์ข้อมูลพนักงานขับรถขนส่งและตรวจสอบความเสี่ยง
             </p>
           </div>
+          <NotificationBell />
         </header>
 
         <div className="p-8 space-y-6">
@@ -164,13 +167,21 @@ export default function DashboardPage() {
           <div className="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-base font-bold text-slate-800">งานขนส่งที่คุณสร้าง</h3>
-              <Link
-                href="/admin/create-job"
-                className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1.5"
-              >
-                <i className="fa-solid fa-plus" />
-                สร้างงานใหม่
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/admin/jobs"
+                  className="text-xs font-bold text-slate-500 hover:text-slate-700"
+                >
+                  ดูทั้งหมด
+                </Link>
+                <Link
+                  href="/admin/create-job"
+                  className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1.5"
+                >
+                  <i className="fa-solid fa-plus" />
+                  สร้างงานใหม่
+                </Link>
+              </div>
             </div>
 
             {jobsLoading ? (
@@ -183,7 +194,7 @@ export default function DashboardPage() {
               </p>
             ) : (
               <div className="space-y-3">
-                {jobs.map((job) => (
+                {sortedJobs.slice(0, 5).map((job) => (
                   <Link
                     key={job.id}
                     href={`/jobs/${job.id}`}
