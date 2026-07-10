@@ -1,11 +1,40 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import AdminSidebar from "@/app/components/AdminSidebar";
 import { useRequireAuth } from "@/lib/use-require-auth";
+import { listJobs, ApiError, type Job } from "@/lib/api";
+import {
+  JOB_STATUS_STYLES,
+  CARGO_TYPE_LABELS,
+  VEHICLE_TYPE_LABELS,
+  formatJobDate,
+} from "@/lib/job-constants";
+
+const ADMIN_ROLES = ["admin", "shipper"];
 
 export default function DashboardPage() {
-  const { user, loading } = useRequireAuth();
-  if (loading || !user) return null;
+  const { user, token, loading } = useRequireAuth("/login/admin", ADMIN_ROLES);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
+  const [jobsError, setJobsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    listJobs(token)
+      .then((data) => setJobs(data ?? []))
+      .catch((err) =>
+        setJobsError(err instanceof ApiError ? err.message : "โหลดรายการงานไม่สำเร็จ")
+      )
+      .finally(() => setJobsLoading(false));
+  }, [token]);
+
+  const latestJob = jobs.length > 0
+    ? jobs.reduce((a, b) => (new Date(a.createdAt) > new Date(b.createdAt) ? a : b))
+    : null;
+
+  if (loading || !user || !ADMIN_ROLES.includes(user.role)) return null;
 
   return (
     <div className="bg-[#f8f9fa] text-slate-800 h-screen w-screen flex overflow-hidden font-[family-name:var(--font-k2d)]">
@@ -27,67 +56,82 @@ export default function DashboardPage() {
               <div className="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-800">
-                    รายละเอียดใบงานขนส่งล่าสุด
+                    ใบงานล่าสุดที่คุณสร้าง
                   </h3>
-                  <div className="flex items-center gap-3 mt-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 font-bold text-sm">
-                      WS
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-800">นายสมชาย ดีใจ</h4>
-                      <p className="text-[10px] text-slate-400">
-                        รหัสพนักงาน: WM-701234 ● คนขับรถพ่วง 18 ล้อ
+                  {latestJob && (
+                    <p className="text-sm font-bold text-slate-700 mt-2">{latestJob.title}</p>
+                  )}
+                </div>
+                {latestJob && (
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span
+                      className={`text-[11px] font-bold px-3 py-1 rounded-lg whitespace-nowrap ${
+                        JOB_STATUS_STYLES[latestJob.status] ?? "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {latestJob.status}
+                    </span>
+                    <Link
+                      href={`/jobs/${latestJob.id}`}
+                      className="text-xs font-bold text-rose-500 hover:text-rose-600 whitespace-nowrap"
+                    >
+                      ดูรายละเอียด
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {jobsLoading ? (
+                <p className="text-sm text-slate-400 py-6 text-center">กำลังโหลด...</p>
+              ) : !latestJob ? (
+                <p className="text-sm text-slate-400 py-6 text-center">
+                  ยังไม่มีงานที่สร้าง — ลองไปที่หน้า &ldquo;สร้างประกาศจ้างงาน&rdquo;
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase">
+                      ค่าจ้างเที่ยวนี้
+                    </p>
+                    <p className="text-2xl font-bold text-slate-800 pt-1">
+                      {latestJob.price ? `${latestJob.price.toLocaleString()} บาท` : "-"}
+                    </p>
+                  </div>
+                  <div className="space-y-1 border-l border-slate-100 pl-0 md:pl-4">
+                    <p className="text-[11px] font-semibold text-slate-400 uppercase">
+                      เส้นทางเดินรถ
+                    </p>
+                    <p className="text-xs text-slate-700 font-bold">
+                      {latestJob.pickupLocation} <span className="text-slate-400 mx-1">→</span>{" "}
+                      {latestJob.dropoffLocation}
+                    </p>
+                    <div className="pt-3">
+                      <p className="text-[10px] text-slate-400 uppercase">กำหนดเวลาเดินทาง</p>
+                      <p className="text-sm font-bold text-slate-700">
+                        {formatJobDate(latestJob.jobDatetime)}
                       </p>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-500">คะแนนขับขี่</span>
-                  <span className="bg-emerald-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
-                    4.8
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase">
-                    ค่าจ้างเที่ยววิ่งนี้
-                  </p>
-                  <p className="text-xs text-emerald-600 font-bold">บันทึกวางบิลสำเร็จ</p>
-                  <p className="text-2xl font-bold text-slate-800 pt-1">18,500 บาท</p>
-                </div>
-                <div className="space-y-1 border-l border-slate-100 pl-0 md:pl-4">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase">
-                    เส้นทางเดินรถ
-                  </p>
-                  <p className="text-xs text-slate-700 font-bold">
-                    กรุงเทพฯ <span className="text-slate-400 mx-1">→</span> แหลมฉบัง
-                  </p>
-                  <div className="pt-3">
-                    <p className="text-[10px] text-slate-400 uppercase">กำหนดเวลาถึงปลายทาง</p>
-                    <p className="text-sm font-bold text-slate-700">07 กรกฎาคม 2026</p>
+                  <div className="space-y-2 border-l border-slate-100 pl-0 md:pl-4">
+                    <div>
+                      <p className="text-[11px] font-semibold text-slate-400 uppercase mb-1">
+                        ประเภทรถ
+                      </p>
+                      <span className="bg-slate-100 text-slate-700 text-[11px] font-bold px-3 py-1 rounded-lg block text-center">
+                        {VEHICLE_TYPE_LABELS[latestJob.vehicleType] ?? latestJob.vehicleType}
+                      </span>
+                    </div>
+                    <div className="pt-1">
+                      <p className="text-[11px] font-semibold text-slate-400 uppercase mb-1">
+                        ประเภทสินค้า
+                      </p>
+                      <span className="bg-slate-100 text-slate-700 text-[11px] font-bold px-3 py-1 rounded-lg block text-center">
+                        {CARGO_TYPE_LABELS[latestJob.cargoType] ?? latestJob.cargoType}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-2 border-l border-slate-100 pl-0 md:pl-4">
-                  <div>
-                    <p className="text-[11px] font-semibold text-slate-400 uppercase mb-1">
-                      สถานะงาน
-                    </p>
-                    <span className="bg-emerald-500 text-white text-[11px] font-bold px-3 py-1 rounded-lg">
-                      กำลังวิ่งงาน
-                    </span>
-                  </div>
-                  <div className="pt-1">
-                    <p className="text-[11px] font-semibold text-slate-400 uppercase mb-1">
-                      ประเภทสินค้า
-                    </p>
-                    <span className="bg-slate-100 text-slate-700 text-[11px] font-bold px-3 py-1 rounded-lg block text-center">
-                      สินค้าอุปโภคบริโภค
-                    </span>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm flex flex-col justify-between">
@@ -115,6 +159,61 @@ export default function DashboardPage() {
                 </span>
               </div>
             </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-slate-200/60 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-base font-bold text-slate-800">งานขนส่งที่คุณสร้าง</h3>
+              <Link
+                href="/admin/create-job"
+                className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1.5"
+              >
+                <i className="fa-solid fa-plus" />
+                สร้างงานใหม่
+              </Link>
+            </div>
+
+            {jobsLoading ? (
+              <p className="text-sm text-slate-400 py-6 text-center">กำลังโหลดรายการงาน...</p>
+            ) : jobsError ? (
+              <p className="text-sm text-rose-500 py-6 text-center">{jobsError}</p>
+            ) : jobs.length === 0 ? (
+              <p className="text-sm text-slate-400 py-6 text-center">
+                ยังไม่มีงานที่สร้าง — ลองกด &ldquo;สร้างงานใหม่&rdquo; ด้านบน
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {jobs.map((job) => (
+                  <Link
+                    key={job.id}
+                    href={`/jobs/${job.id}`}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-slate-800 truncate">{job.title}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {job.pickupLocation} <span className="mx-1">→</span> {job.dropoffLocation}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4 flex-shrink-0">
+                      <div className="text-right">
+                        <p className="text-sm font-bold text-slate-800">
+                          {job.price ? `${job.price.toLocaleString()} บาท` : "-"}
+                        </p>
+                        <p className="text-[10px] text-slate-400">{formatJobDate(job.jobDatetime)}</p>
+                      </div>
+                      <span
+                        className={`text-[11px] font-bold px-3 py-1 rounded-lg whitespace-nowrap ${
+                          JOB_STATUS_STYLES[job.status] ?? "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {job.status}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

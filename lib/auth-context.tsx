@@ -14,6 +14,7 @@ const TOKEN_KEY = "botnoi_access_token";
 
 type AuthContextValue = {
   user: User | null;
+  token: string | null;
   loading: boolean;
   login: (identifier: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
@@ -62,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

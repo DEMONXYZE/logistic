@@ -4,6 +4,8 @@ import Link from "next/link";
 import AdminSidebar from "@/app/components/AdminSidebar";
 import { useRequireAuth } from "@/lib/use-require-auth";
 
+const ADMIN_ROLES = ["admin", "shipper"];
+
 const trackingRows = [
   {
     initials: "SD",
@@ -56,8 +58,8 @@ const trackingRows = [
 ];
 
 export default function TrackingPage() {
-  const { user, loading } = useRequireAuth();
-  if (loading || !user) return null;
+  const { user, loading } = useRequireAuth("/login/admin", ADMIN_ROLES);
+  if (loading || !user || !ADMIN_ROLES.includes(user.role)) return null;
 
   return (
     <div className="bg-[#f8f9fa] text-slate-800 h-screen w-screen flex overflow-hidden font-[family-name:var(--font-k2d)]">
