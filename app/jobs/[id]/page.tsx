@@ -18,10 +18,12 @@ import {
   listDrivers,
   sendJobOffer,
   listJobOffers,
+  getDeliveryTimeline,
   ApiError,
   type Job,
   type Driver,
   type JobOffer,
+  type DeliveryEvent,
 } from "@/lib/api";
 import {
   JOB_STATUS_STYLES,
@@ -30,6 +32,7 @@ import {
   VEHICLE_TYPE_LABELS,
   OFFER_STATUS_STYLES,
   OFFER_STATUS_LABELS,
+  DELIVERY_STATUS_STEPS,
   formatJobDateTime,
 } from "@/lib/job-constants";
 
@@ -54,6 +57,9 @@ export default function JobDetailPage() {
   const [offerError, setOfferError] = useState<string | null>(null);
   const [offerSuccess, setOfferSuccess] = useState<string | null>(null);
 
+  const [timeline, setTimeline] = useState<DeliveryEvent[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
   useEffect(() => {
     if (!token || !id) return;
     getJob(token, id)
@@ -63,6 +69,15 @@ export default function JobDetailPage() {
       )
       .finally(() => setJobLoading(false));
   }, [token, id]);
+
+  useEffect(() => {
+    if (!token || !job?.assignmentId) return;
+    setTimelineLoading(true);
+    getDeliveryTimeline(token, job.assignmentId)
+      .then((data) => setTimeline(data ?? []))
+      .catch(() => {})
+      .finally(() => setTimelineLoading(false));
+  }, [token, job?.assignmentId]);
 
   useEffect(() => {
     if (!token || !id) return;
@@ -265,6 +280,42 @@ export default function JobDetailPage() {
                 )}
               </div>
             </div>
+
+            {job.assignmentId && (
+              <div className="pt-6 border-t border-gray-100">
+                <h3 className="text-base font-bold text-gray-900 mb-3">Timeline การจัดส่ง</h3>
+
+                {timelineLoading ? (
+                  <p className="text-sm text-gray-400 py-4 text-center">กำลังโหลด...</p>
+                ) : (
+                  <div className="space-y-2">
+                    {DELIVERY_STATUS_STEPS.map((step) => {
+                      const event = timeline.find((e) => e.status === step.value);
+                      return (
+                        <div
+                          key={step.value}
+                          className={`flex items-center justify-between gap-3 p-3 rounded-xl border ${
+                            event ? "border-emerald-100 bg-emerald-50/50" : "border-gray-100"
+                          }`}
+                        >
+                          <span
+                            className={`text-sm font-semibold ${
+                              event ? "text-emerald-700" : "text-gray-400"
+                            }`}
+                          >
+                            {event ? "✓ " : ""}
+                            {step.label}
+                          </span>
+                          <span className="text-xs text-gray-400 whitespace-nowrap">
+                            {event ? formatJobDateTime(event.createdAt) : "ยังไม่ถึงขั้นตอนนี้"}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
             {canOffer && (
               <div className="pt-6 border-t border-gray-100">

@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
 export type Role = "admin" | "driver" | "shipper" | string;
 
@@ -99,6 +99,7 @@ export type Job = {
   price: number;
   jobDatetime: string;
   status: string;
+  assignmentId?: string;
   createdAt: string;
 };
 
