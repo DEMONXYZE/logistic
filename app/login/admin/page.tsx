@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
     <div className="bg-slate-50 min-h-screen flex items-center justify-center p-4">
       <div className="bg-white p-10 rounded-3xl shadow-xl shadow-slate-200/80 w-full max-w-md border border-slate-100">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto shadow-md mb-4">
+          <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto shadow-md mb-4">
             W
           </div>
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
@@ -59,14 +59,14 @@ export default function AdminLoginPage() {
               อีเมลผู้ใช้งาน (Email)
             </label>
             <div className="relative">
-              <i className="fa-solid fa-envelope absolute left-4 top-3.5 text-slate-400" />
+              <i className="fa-solid fa-envelope absolute left-4 top-4.5 text-slate-400" />
               <input
                 type="email"
                 placeholder="user@wemove.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-slate-400 focus:bg-white transition-all text-slate-700"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:border-slate-400 focus:bg-white transition-all text-slate-700"
               />
             </div>
           </div>
@@ -91,8 +91,9 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-md text-sm mt-2"
+            className="w-full py-3.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-md text-sm mt-2"
           >
+          <i className="fa-solid fa-right-to-bracket mr-2" />
             {submitting ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบผู้ใช้งาน"}
           </button>
         </form>

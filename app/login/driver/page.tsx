@@ -20,7 +20,7 @@ export default function DriverLoginPage() {
     setSubmitting(true);
     try {
       await login(phone, password);
-      router.push("/dashboard");
+      router.push('/driver/jobs')
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -34,9 +34,9 @@ export default function DriverLoginPage() {
 
   return (
     <div className="bg-slate-50 min-h-screen flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/80 w-full max-w-md border border-slate-100">
-        <div className="text-center mb-6">
-          <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-3">
+      <div className="bg-white p-10 rounded-3xl shadow-xl shadow-slate-200/80 w-full max-w-md border border-slate-100">
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
             <i className="fa-solid fa-user-gear" />
           </div>
           <h1 className="text-xl font-bold text-slate-800">ระบบคนขับรถ WeMove</h1>
@@ -57,7 +57,7 @@ export default function DriverLoginPage() {
               เบอร์โทรศัพท์มือถือ
             </label>
             <div className="relative">
-              <i className="fa-solid fa-phone absolute left-4 top-4 text-slate-400" />
+              <i className="fa-solid fa-phone absolute left-4 top-5 text-slate-400" />
               <input
                 type="tel"
                 placeholder="09X-XXX-XXXX"
@@ -69,11 +69,11 @@ export default function DriverLoginPage() {
             </div>
           </div>
           <div>
-            <label className="text-[11px] text-slate-500 font-bold uppercase block mb-1">
+            <label className="text-[11px] text-slate-500 font-bold uppercase block mb-1.5">
               รหัสผ่านพนักงาน
             </label>
             <div className="relative">
-              <i className="fa-solid fa-key absolute left-4 top-4 text-slate-400" />
+              <i className="fa-solid fa-key absolute left-4 top-4.5 text-slate-400" />
               <input
                 type="password"
                 placeholder="••••••••"
@@ -85,11 +85,11 @@ export default function DriverLoginPage() {
             </div>
           </div>
           <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-md text-base mt-2 flex items-center justify-center gap-2"
-          >
-            <i className="fa-solid fa-right-to-bracket" />
+              type="submit"
+              disabled={submitting}
+              className="w-full py-3.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-md text-sm mt-2"
+            >
+            <i className="fa-solid fa-right-to-bracket mr-2" />
             {submitting ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบพนักงานขับรถ"}
           </button>
         </form>
