@@ -131,7 +131,7 @@ export default function DashboardPage() {
                     </span>
                     <Link
                       href={`/jobs/${latestJob.id}`}
-                      className="text-xs font-bold text-rose-500 hover:text-rose-600 whitespace-nowrap transition-colors"
+                      className="text-xs font-bold text-rose-500 hover:text-rose-600 whitespace-nowrap transition-colors no-underline hover:no-underline"
                     >
                       ดูรายละเอียด
                     </Link>
@@ -199,7 +199,7 @@ export default function DashboardPage() {
                 {latestJob ? (
                   <Link
                     href={`/jobs/${latestJob.id}`}
-                    className="text-xs text-rose-500 hover:text-rose-600 font-bold cursor-pointer hover:underline transition-all"
+                    className="text-xs font-bold text-rose-500 hover:text-rose-600 whitespace-nowrap transition-colors no-underline hover:no-underline"
                   >
                     รายละเอียด
                   </Link>

@@ -66,29 +66,29 @@ export default function TrackingPage() {
       <AdminSidebar />
 
       <main className="flex-grow flex flex-col h-screen overflow-y-auto relative">
-        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-8 py-5 flex items-center justify-between sticky top-0 z-20">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
+        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 sm:px-8 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sticky top-0 z-20">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900">
               ติดตามสถานะและการโทร (Voice Bot Tracking)
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
               ตารางสรุปประวัติสายโทรเข้า-ออกของระบบ Voice AI เพื่อประเมินความปลอดภัยเรียลไทม์
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl flex items-center gap-2 w-full sm:w-auto">
               <input
                 type="text"
                 placeholder="ค้นหาชื่อ / เบอร์โทร..."
-                className="bg-transparent text-xs outline-none w-44"
+                className="bg-transparent text-xs outline-none w-full sm:w-44"
               />
-              <i className="fa-solid fa-magnifying-glass text-slate-400 text-xs" />
+              <i className="fa-solid fa-magnifying-glass text-slate-400 text-xs flex-shrink-0" />
             </div>
           </div>
         </header>
 
-        <div className="p-8 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="p-4 sm:p-8 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm">
               <p className="text-[11px] font-bold text-slate-400 uppercase">จำนวนการโทรทั้งหมด</p>
               <p className="text-2xl font-bold text-slate-800 mt-1">48 สาย</p>
@@ -108,11 +108,11 @@ export default function TrackingPage() {
           </div>
 
           <div className="bg-white rounded-3xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+            <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between bg-white">
               <h3 className="text-sm font-bold text-slate-800">
                 ตารางบันทึกการติดตามงาน (Tracking Logs)
               </h3>
-              <button className="text-xs font-semibold text-slate-500 hover:text-slate-800 border border-slate-200 px-3 py-1.5 rounded-xl transition-all">
+              <button className="text-xs font-semibold text-slate-500 hover:text-slate-800 border border-slate-200 px-3 py-1.5 rounded-xl transition-all whitespace-nowrap self-start sm:self-auto">
                 <i className="fa-solid fa-arrow-down-wide-short mr-1" /> ตัวกรองขั้นสูง
               </button>
             </div>

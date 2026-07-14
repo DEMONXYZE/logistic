@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ArchiveIcon, BellIcon, CheckCheckIcon, InboxIcon, MessageCircleIcon } from "lucide-react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
@@ -80,17 +81,20 @@ function NotificationSheet() {
   return (
     <>
       <TriggerButton onClick={() => setOpen(true)} />
-      {open && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-          <div
-            className="absolute bottom-0 left-0 right-0 bg-background rounded-t-xl border-t border-border overflow-hidden flex flex-col animate-in slide-in-from-bottom"
-            style={{ height: "60dvh", maxHeight: "60dvh" }}
-          >
-            <NotificationTabs />
-          </div>
-        </div>
-      )}
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+            <div
+              className="relative w-full max-w-sm bg-background rounded-xl border border-border shadow-lg overflow-hidden flex flex-col animate-in zoom-in-95 fade-in-0"
+              style={{ maxHeight: "70dvh" }}
+            >
+              <NotificationTabs />
+            </div>
+          </div>,
+          document.body
+        )}
     </>
   );
 }

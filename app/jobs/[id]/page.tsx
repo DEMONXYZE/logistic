@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Search, Truck, ShieldCheck, Scale, Info } from "lucide-react"; // 🌟 เพิ่มไอคอนสวยๆ สำหรับ Modal รถบรรทุก
+import { ArrowLeft, Search, Truck, ShieldCheck, Scale, Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,13 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import {
   getJob,
@@ -19,18 +26,22 @@ import {
   listDrivers,
   sendJobOffer,
   listJobOffers,
+  getDeliveryTimeline,
   ApiError,
   type Job,
   type Driver,
   type JobOffer,
+  type DeliveryEvent,
 } from "@/lib/api";
 import {
   JOB_STATUS_STYLES,
   JOB_STATUS_LABELS,
   CARGO_TYPE_LABELS,
+  VEHICLE_TYPES,
   VEHICLE_TYPE_LABELS,
   OFFER_STATUS_STYLES,
   OFFER_STATUS_LABELS,
+  DELIVERY_STATUS_STEPS,
   formatJobDateTime,
 } from "@/lib/job-constants";
 
@@ -54,11 +65,15 @@ export default function JobDetailPage() {
   const [driverPage, setDriverPage] = useState(1);
   const [driverSort, setDriverSort] = useState<"score" | "availability">("score");
   const [driverSearch, setDriverSearch] = useState("");
+  const [vehicleFilter, setVehicleFilter] = useState<string>("all");
   const [offeringDriverId, setOfferingDriverId] = useState<string | null>(null);
   const [offerError, setOfferError] = useState<string | null>(null);
   const [offerSuccess, setOfferSuccess] = useState<string | null>(null);
 
   const DRIVERS_PER_PAGE = 10;
+
+  const [timeline, setTimeline] = useState<DeliveryEvent[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
 
   useEffect(() => {
     if (!token || !id) return;
@@ -69,6 +84,15 @@ export default function JobDetailPage() {
       )
       .finally(() => setJobLoading(false));
   }, [token, id]);
+
+  useEffect(() => {
+    if (!token || !job?.assignmentId) return;
+    setTimelineLoading(true);
+    getDeliveryTimeline(token, job.assignmentId)
+      .then((data) => setTimeline(data ?? []))
+      .catch(() => {})
+      .finally(() => setTimelineLoading(false));
+  }, [token, job?.assignmentId]);
 
   useEffect(() => {
     if (!token || !id) return;
@@ -111,9 +135,9 @@ export default function JobDetailPage() {
     }
     return b.currentScore - a.currentScore;
   });
-  const searchedAvailableDrivers = sortedAvailableDrivers.filter((d) =>
-    d.fullName.toLowerCase().includes(driverSearch.trim().toLowerCase())
-  );
+  const searchedAvailableDrivers = sortedAvailableDrivers
+    .filter((d) => vehicleFilter === "all" || d.carType === vehicleFilter)
+    .filter((d) => d.fullName.toLowerCase().includes(driverSearch.trim().toLowerCase()));
   const totalDriverPages = Math.max(1, Math.ceil(searchedAvailableDrivers.length / DRIVERS_PER_PAGE));
   const safeDriverPage = Math.min(driverPage, totalDriverPages);
   const pagedDrivers = searchedAvailableDrivers.slice(
@@ -152,7 +176,7 @@ export default function JobDetailPage() {
   const acceptedDriver = acceptedOffer ? drivers.find((d) => d.userId === acceptedOffer.driverId) : undefined;
 
   // 🚚 LOGIC คำนวณเปอร์เซ็นต์ความจุคนขับ (ตั้ง Max บรรทุกสมมติที่ 1,000 กก. สำหรับรถกระบะทั่วไป)
-  const maxWeightLimit = 1000; 
+  const maxWeightLimit = 1000;
   const rawPercentage = job && job.weight ? (job.weight / maxWeightLimit) * 100 : 0;
   // UX Hack: ถ้าน้ำหนักสินค้ามากกว่า 0 แต่หารแล้วไม่ถึง 1% ให้ปัดขึ้นเป็น 1% เสมอเพื่อให้กราฟขยับไม่นิ่งจืด
   const displayPercentage = job && job.weight > 0 ? Math.max(1, Math.round(rawPercentage)) : 0;
@@ -166,7 +190,6 @@ export default function JobDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-8 flex flex-col items-center justify-center font-[family-name:var(--font-k2d)]">
       <div className="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-        
         <div className="mb-8 border-b border-gray-100 pb-4">
           <Link
             href="/dashboard"
@@ -188,7 +211,6 @@ export default function JobDetailPage() {
           <p className="text-sm text-gray-400 py-10 text-center">ไม่พบงานนี้</p>
         ) : (
           <div className="space-y-8">
-            
             {/* 🌟 ส่วนบนสุด: การ์ดพื้นที่ความจุรถบรรทุกของงานชิ้นนี้ */}
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 bg-gradient-to-r from-slate-50/50 to-white">
               <div className="flex items-center gap-4">
@@ -212,7 +234,7 @@ export default function JobDetailPage() {
                   {displayPercentage}%
                 </div>
 
-                {/* 🌟 1. ปุ่มเปิด Pop-up รายละเอียดข้อมูลตู้/ท้ายรถกระบะ */}
+                {/* 🌟 ปุ่มเปิด Pop-up รายละเอียดข้อมูลตู้/ท้ายรถกระบะ */}
                 <Dialog>
                   <DialogTrigger asChild>
                     <button className="h-9 text-xs font-bold text-gray-500 hover:text-red-600 border border-gray-200 hover:bg-gray-50 px-3 rounded-xl flex items-center gap-1 transition-all">
@@ -230,7 +252,7 @@ export default function JobDetailPage() {
                         รายละเอียดขนาดมิติตู้และพิกัดการรับน้ำหนักของประเภทรถที่เลือก
                       </DialogDescription>
                     </DialogHeader>
-                    
+
                     <div className="mt-4 space-y-4 text-sm">
                       <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-100">
                         <div className="flex justify-between">
@@ -392,6 +414,42 @@ export default function JobDetailPage() {
               </div>
             </div>
 
+            {job.assignmentId && (
+              <div className="pt-6 border-t border-gray-100">
+                <h3 className="text-base font-bold text-gray-900 mb-3">Timeline การจัดส่ง</h3>
+
+                {timelineLoading ? (
+                  <p className="text-sm text-gray-400 py-4 text-center">กำลังโหลด...</p>
+                ) : (
+                  <div className="space-y-2">
+                    {DELIVERY_STATUS_STEPS.map((step) => {
+                      const event = timeline.find((e) => e.status === step.value);
+                      return (
+                        <div
+                          key={step.value}
+                          className={`flex items-center justify-between gap-3 p-3 rounded-xl border ${
+                            event ? "border-emerald-100 bg-emerald-50/50" : "border-gray-100"
+                          }`}
+                        >
+                          <span
+                            className={`text-sm font-semibold ${
+                              event ? "text-emerald-700" : "text-gray-400"
+                            }`}
+                          >
+                            {event ? "✓ " : ""}
+                            {step.label}
+                          </span>
+                          <span className="text-xs text-gray-400 whitespace-nowrap">
+                            {event ? formatJobDateTime(event.createdAt) : "ยังไม่ถึงขั้นตอนนี้"}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {canOffer && (
               <div className="pt-6 border-t border-gray-100">
                 <div className="flex items-center justify-between mb-1">
@@ -461,6 +519,26 @@ export default function JobDetailPage() {
                               </button>
                             </div>
 
+                            <Select
+                              value={vehicleFilter}
+                              onValueChange={(v) => {
+                                setVehicleFilter(v);
+                                setDriverPage(1);
+                              }}
+                            >
+                              <SelectTrigger className="h-auto w-auto rounded-lg border-gray-200 bg-gray-50 px-3 py-1.5 text-xs focus:ring-2 focus:ring-red-500 focus:bg-white">
+                                <SelectValue placeholder="ประเภทรถ" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="all">ทุกประเภทรถ</SelectItem>
+                                {VEHICLE_TYPES.map((v) => (
+                                  <SelectItem key={v.value} value={v.value}>
+                                    {v.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+
                             <div className="relative">
                               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-gray-400 pointer-events-none" />
                               <input
@@ -478,7 +556,16 @@ export default function JobDetailPage() {
 
                           {searchedAvailableDrivers.length === 0 ? (
                             <p className="text-sm text-gray-400 py-8 text-center">
-                              ไม่พบคนขับที่ชื่อตรงกับ &ldquo;{driverSearch}&rdquo;
+                              {driverSearch.trim() ? (
+                                <>ไม่พบคนขับที่ชื่อตรงกับ &ldquo;{driverSearch}&rdquo;</>
+                              ) : vehicleFilter !== "all" ? (
+                                <>
+                                  ไม่มีคนขับรถประเภท &ldquo;
+                                  {VEHICLE_TYPE_LABELS[vehicleFilter] ?? vehicleFilter}&rdquo;
+                                </>
+                              ) : (
+                                "ไม่พบคนขับ"
+                              )}
                             </p>
                           ) : (
                             <div className="overflow-x-auto -mx-2">
