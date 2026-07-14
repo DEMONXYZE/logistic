@@ -207,15 +207,15 @@ export default function JobDetailPage() {
               </div>
 
               <div className="flex items-center gap-4">
-                {/* วงล้อแสดงเปอร์เซ็นต์สีชมพูเด้งดุ๊กดิ๊ก */}
-                <div className="bg-gradient-to-r from-rose-500 to-rose-400 text-white font-black text-2xl px-6 py-3 rounded-xl shadow-md tracking-wider animate-pulse">
+                {/* 🌟 กรอบเปอร์เซ็นต์ - ปรับให้ความสูงเท่ากับปุ่ม "ดูรายละเอียดรถ" (h-9 ทั้งคู่) */}
+                <div className="h-9 flex items-center justify-center bg-gradient-to-r from-rose-500 to-rose-400 text-white font-black text-sm px-5 rounded-xl shadow-md tracking-wider animate-pulse">
                   {displayPercentage}%
                 </div>
 
                 {/* 🌟 1. ปุ่มเปิด Pop-up รายละเอียดข้อมูลตู้/ท้ายรถกระบะ */}
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button className="text-xs font-bold text-gray-500 hover:text-red-600 border border-gray-200 hover:bg-gray-50 px-3 py-2 rounded-xl flex items-center gap-1 transition-all">
+                    <button className="h-9 text-xs font-bold text-gray-500 hover:text-red-600 border border-gray-200 hover:bg-gray-50 px-3 rounded-xl flex items-center gap-1 transition-all">
                       <Info size={14} />
                       ดูรายละเอียดรถ
                     </button>
