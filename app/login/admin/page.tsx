@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
+import { Truck } from "lucide-react";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -20,6 +21,8 @@ export default function AdminLoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
+      // 🌟 หน่วงเวลาให้รถวิ่งโชว์ 4 วินาทีเต็ม ๆ ก่อนย้ายหน้า
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof ApiError) {
@@ -27,13 +30,30 @@ export default function AdminLoginPage() {
       } else {
         setError("เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
       }
-    } finally {
-      setSubmitting(false);
+      setSubmitting(false); // ปิดโหลดเฉพาะตอนที่ล็อกอินพัง เพื่อให้กรอกใหม่ได้
     }
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+    <div className="relative bg-slate-50 min-h-screen flex items-center justify-center p-4">
+      
+      {/* หน้าจอ Loading รถบรรทุกวิ่ง 4 วินาที */}
+      {submitting && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm animate-fade-in">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="animate-bounce">
+              <Truck size={64} className="text-red-600 animate-pulse" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-800 animate-pulse">
+              กำลังเข้าสู่ระบบ...
+            </h2>
+            <p className="text-xs text-slate-400 font-medium">
+              กรุณารอสักครู่ ระบบกำลังจัดเตรียมข้อมูลหน้าแดชบอร์ด
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white p-10 rounded-3xl shadow-xl shadow-slate-200/80 w-full max-w-md border border-slate-100">
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto shadow-md mb-4">
@@ -93,7 +113,7 @@ export default function AdminLoginPage() {
             disabled={submitting}
             className="w-full py-3.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all shadow-md text-sm mt-2"
           >
-          <i className="fa-solid fa-right-to-bracket mr-2" />
+            <i className="fa-solid fa-right-to-bracket mr-2" />
             {submitting ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบผู้ใช้งาน"}
           </button>
         </form>

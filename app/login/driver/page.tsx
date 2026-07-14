@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
+import { Truck } from "lucide-react";
 
 export default function DriverLoginPage() {
   const router = useRouter();
@@ -20,20 +21,39 @@ export default function DriverLoginPage() {
     setSubmitting(true);
     try {
       await login(phone, password);
-      router.push('/driver/jobs')
+      // 🌟 หน่วงเวลาให้รถวิ่งโชว์ 4 วินาทีเต็ม ๆ ก่อนย้ายหน้า
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      router.push('/driver/jobs');
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
         setError("เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
       }
-    } finally {
-      setSubmitting(false);
+      setSubmitting(false); // ปิดโหลดเฉพาะตอนที่ล็อกอินพัง เพื่อให้กรอกใหม่ได้
     }
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+    <div className="relative bg-slate-50 min-h-screen flex items-center justify-center p-4">
+      
+      {/* หน้าจอ Loading รถบรรทุกวิ่ง 4 วินาที */}
+      {submitting && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm animate-fade-in">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="animate-bounce">
+              <Truck size={64} className="text-red-600 animate-pulse" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-800 animate-pulse">
+              กำลังเข้าสู่ระบบ...
+            </h2>
+            <p className="text-xs text-slate-400 font-medium">
+              กรุณารอสักครู่ ระบบกำลังจัดเตรียมข้อมูลตารางงานพนักงาน
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white p-10 rounded-3xl shadow-xl shadow-slate-200/80 w-full max-w-md border border-slate-100">
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
