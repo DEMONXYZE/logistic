@@ -134,6 +134,9 @@ export function cancelJob(token: string, id: string) {
 
 export type Driver = {
   userId: string;
+  fullName: string;
+  phone: string;
+  email?: string;
   licenseNo: string;
   carType: string;
   currentScore: number;

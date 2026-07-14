@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useRequireAuth } from "@/lib/use-require-auth";
 import {
   getJob,
@@ -52,10 +53,15 @@ export default function JobDetailPage() {
   const [offers, setOffers] = useState<JobOffer[]>([]);
   const [offersLoading, setOffersLoading] = useState(true);
 
-  const [selectedDriverId, setSelectedDriverId] = useState("");
-  const [offerSubmitting, setOfferSubmitting] = useState(false);
+  const [driverDialogOpen, setDriverDialogOpen] = useState(false);
+  const [driverPage, setDriverPage] = useState(1);
+  const [driverSort, setDriverSort] = useState<"score" | "availability">("score");
+  const [driverSearch, setDriverSearch] = useState("");
+  const [offeringDriverId, setOfferingDriverId] = useState<string | null>(null);
   const [offerError, setOfferError] = useState<string | null>(null);
   const [offerSuccess, setOfferSuccess] = useState<string | null>(null);
+
+  const DRIVERS_PER_PAGE = 10;
 
   const [timeline, setTimeline] = useState<DeliveryEvent[]>([]);
   const [timelineLoading, setTimelineLoading] = useState(false);
@@ -111,27 +117,39 @@ export default function JobDetailPage() {
       .map((o) => o.driverId)
   );
   const availableDrivers = drivers.filter((d) => !activeOfferedDriverIds.has(d.userId));
-
-  async function handleSendOffer(e: React.FormEvent) {
-    e.preventDefault();
-    if (!token || !id || !selectedDriverId) return;
-    if (activeOfferedDriverIds.has(selectedDriverId)) {
-      setOfferError("เสนองานให้คนขับคนนี้ไปแล้ว รอผลตอบรับก่อน");
-      return;
+  const sortedAvailableDrivers = [...availableDrivers].sort((a, b) => {
+    if (driverSort === "availability") {
+      if (a.availability !== b.availability) {
+        return a.availability === "available" ? -1 : 1;
+      }
+      return b.currentScore - a.currentScore;
     }
-    setOfferSubmitting(true);
+    return b.currentScore - a.currentScore;
+  });
+  const searchedAvailableDrivers = sortedAvailableDrivers.filter((d) =>
+    d.fullName.toLowerCase().includes(driverSearch.trim().toLowerCase())
+  );
+  const totalDriverPages = Math.max(1, Math.ceil(searchedAvailableDrivers.length / DRIVERS_PER_PAGE));
+  const safeDriverPage = Math.min(driverPage, totalDriverPages);
+  const pagedDrivers = searchedAvailableDrivers.slice(
+    (safeDriverPage - 1) * DRIVERS_PER_PAGE,
+    safeDriverPage * DRIVERS_PER_PAGE
+  );
+
+  async function handleOfferToDriver(driverId: string) {
+    if (!token || !id) return;
+    setOfferingDriverId(driverId);
     setOfferError(null);
     setOfferSuccess(null);
     try {
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-      const offer = await sendJobOffer(token, id, { driverId: selectedDriverId, expiresAt });
+      const offer = await sendJobOffer(token, id, { driverId, expiresAt });
       setOffers((prev) => [offer, ...prev]);
       setOfferSuccess("ส่ง Offer ให้คนขับเรียบร้อยแล้ว (หมดอายุใน 24 ชม.)");
-      setSelectedDriverId("");
     } catch (err) {
       setOfferError(err instanceof ApiError ? err.message : "ส่ง Offer ไม่สำเร็จ");
     } finally {
-      setOfferSubmitting(false);
+      setOfferingDriverId(null);
     }
   }
 
@@ -139,6 +157,14 @@ export default function JobDetailPage() {
     const d = drivers.find((x) => x.userId === driverId);
     return d ? `${d.licenseNo} · ${VEHICLE_TYPE_LABELS[d.carType] ?? d.carType}` : driverId;
   }
+
+  function initialsOf(name: string) {
+    const parts = name.trim().split(/\s+/);
+    return parts.slice(0, 2).map((p) => p[0]).join("").toUpperCase();
+  }
+
+  const acceptedOffer = offers.find((o) => o.offerStatus === "accepted");
+  const acceptedDriver = acceptedOffer ? drivers.find((d) => d.userId === acceptedOffer.driverId) : undefined;
 
   if (loading || !user) return null;
 
@@ -319,37 +345,176 @@ export default function JobDetailPage() {
 
             {canOffer && (
               <div className="pt-6 border-t border-gray-100">
-                <h3 className="text-base font-bold text-gray-900 mb-3">เสนองานให้คนขับ</h3>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-base font-bold text-gray-900">เสนองานให้คนขับ</h3>
 
-                <form onSubmit={handleSendOffer} className="flex flex-col sm:flex-row gap-3">
-                  <Select value={selectedDriverId} onValueChange={setSelectedDriverId}>
-                    <SelectTrigger className="h-auto flex-grow w-full rounded-lg border-gray-200 bg-gray-50 px-4 py-2.5 focus:ring-2 focus:ring-red-500 focus:bg-white">
-                      <SelectValue placeholder="-- เลือกคนขับ --" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableDrivers.map((d) => (
-                        <SelectItem key={d.userId} value={d.userId}>
-                          {d.licenseNo} · {VEHICLE_TYPE_LABELS[d.carType] ?? d.carType} · คะแนน{" "}
-                          {d.currentScore} · {d.availability === "available" ? "ว่าง" : "ไม่ว่าง"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <button
-                    type="submit"
-                    disabled={offerSubmitting || !selectedDriverId}
-                    className="bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-all whitespace-nowrap"
+                  <Dialog
+                    open={driverDialogOpen}
+                    onOpenChange={(open) => {
+                      setDriverDialogOpen(open);
+                      if (open) {
+                        setDriverPage(1);
+                        setOfferError(null);
+                      }
+                    }}
                   >
-                    {offerSubmitting ? "กำลังส่ง..." : "ส่ง Offer"}
-                  </button>
-                </form>
-                <p className="text-[11px] text-gray-400 mt-1.5">
-                  {availableDrivers.length === 0
-                    ? "เสนองานให้คนขับที่มีอยู่ครบทุกคนแล้ว รอผลตอบรับก่อนเสนอเพิ่ม"
-                    : "Offer จะหมดอายุอัตโนมัติใน 24 ชั่วโมงหากคนขับไม่ตอบรับ · คนขับที่เสนอไปแล้วจะไม่ขึ้นในลิสต์ซ้ำ"}
-                </p>
+                    <DialogTrigger asChild>
+                      <button
+                        type="button"
+                        className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-sm transition-all whitespace-nowrap"
+                      >
+                        เลือกคนขับเพื่อเสนองาน
+                      </button>
+                    </DialogTrigger>
 
-                {offerError && <p className="text-xs text-rose-500 font-semibold mt-2">{offerError}</p>}
+                    <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>เลือกคนขับ</DialogTitle>
+                      <DialogDescription>
+                        คนขับที่ยังไม่ได้เสนองานนี้ให้ ({availableDrivers.length} คน)
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {availableDrivers.length === 0 ? (
+                      <p className="text-sm text-gray-400 py-8 text-center">
+                        เสนองานให้คนขับที่มีอยู่ครบทุกคนแล้ว รอผลตอบรับก่อนเสนอเพิ่ม
+                      </p>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400">เรียงตาม:</span>
+                            <button
+                              onClick={() => {
+                                setDriverSort("score");
+                                setDriverPage(1);
+                              }}
+                              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+                                driverSort === "score"
+                                  ? "bg-red-600 text-white"
+                                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                              }`}
+                            >
+                              คะแนนสูงสุด
+                            </button>
+                            <button
+                              onClick={() => {
+                                setDriverSort("availability");
+                                setDriverPage(1);
+                              }}
+                              className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+                                driverSort === "availability"
+                                  ? "bg-red-600 text-white"
+                                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                              }`}
+                            >
+                              ว่างก่อน
+                            </button>
+                          </div>
+
+                          <div className="relative">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-gray-400 pointer-events-none" />
+                            <input
+                              type="text"
+                              value={driverSearch}
+                              onChange={(e) => {
+                                setDriverSearch(e.target.value);
+                                setDriverPage(1);
+                              }}
+                              placeholder="ค้นหาชื่อคนขับ..."
+                              className="w-full sm:w-48 pl-8 pr-3 py-1.5 text-xs rounded-lg border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition"
+                            />
+                          </div>
+                        </div>
+
+                        {searchedAvailableDrivers.length === 0 ? (
+                          <p className="text-sm text-gray-400 py-8 text-center">
+                            ไม่พบคนขับที่ชื่อตรงกับ &ldquo;{driverSearch}&rdquo;
+                          </p>
+                        ) : (
+                        <div className="overflow-x-auto -mx-2">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="text-left text-[11px] font-semibold text-gray-400 uppercase border-b border-gray-100">
+                                <th className="px-2 py-2">คนขับ</th>
+                                <th className="px-2 py-2">คะแนน</th>
+                                <th className="px-2 py-2">สถานะ</th>
+                                <th className="px-2 py-2 text-right">&nbsp;</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                              {pagedDrivers.map((d) => (
+                                <tr key={d.userId}>
+                                  <td className="px-2 py-2.5">
+                                    <p className="font-bold text-gray-800">{d.fullName}</p>
+                                    <p className="text-xs text-gray-400">
+                                      {d.licenseNo} · {VEHICLE_TYPE_LABELS[d.carType] ?? d.carType}
+                                    </p>
+                                  </td>
+                                  <td className="px-2 py-2.5 font-bold text-gray-700 whitespace-nowrap">
+                                    {d.currentScore}
+                                  </td>
+                                  <td className="px-2 py-2.5">
+                                    <span
+                                      className={`text-[11px] font-bold px-2.5 py-1 rounded-lg whitespace-nowrap ${
+                                        d.availability === "available"
+                                          ? "bg-emerald-100 text-emerald-700"
+                                          : "bg-gray-100 text-gray-500"
+                                      }`}
+                                    >
+                                      {d.availability === "available" ? "ว่าง" : "ไม่ว่าง"}
+                                    </span>
+                                  </td>
+                                  <td className="px-2 py-2.5 text-right">
+                                    <button
+                                      onClick={() => handleOfferToDriver(d.userId)}
+                                      disabled={offeringDriverId === d.userId}
+                                      className="bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-all whitespace-nowrap"
+                                    >
+                                      {offeringDriverId === d.userId ? "กำลังส่ง..." : "เสนองาน"}
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        )}
+
+                        {totalDriverPages > 1 && (
+                          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                            <button
+                              onClick={() => setDriverPage((p) => Math.max(1, p - 1))}
+                              disabled={safeDriverPage === 1}
+                              className="text-xs font-bold text-gray-500 hover:text-gray-800 disabled:opacity-40"
+                            >
+                              ← ก่อนหน้า
+                            </button>
+                            <span className="text-xs text-gray-400">
+                              หน้า {safeDriverPage} / {totalDriverPages}
+                            </span>
+                            <button
+                              onClick={() => setDriverPage((p) => Math.min(totalDriverPages, p + 1))}
+                              disabled={safeDriverPage === totalDriverPages}
+                              className="text-xs font-bold text-gray-500 hover:text-gray-800 disabled:opacity-40"
+                            >
+                              หน้าถัดไป →
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    <p className="text-[11px] text-gray-400 mt-3">
+                      Offer จะหมดอายุอัตโนมัติใน 24 ชั่วโมงหากคนขับไม่ตอบรับ
+                    </p>
+                    {offerError && (
+                      <p className="text-xs text-rose-500 font-semibold mt-2">{offerError}</p>
+                    )}
+                  </DialogContent>
+                  </Dialog>
+                </div>
+
                 {offerSuccess && (
                   <p className="text-xs text-emerald-600 font-semibold mt-2">{offerSuccess}</p>
                 )}
@@ -358,11 +523,42 @@ export default function JobDetailPage() {
 
             <div className="pt-6 border-t border-gray-100">
               <h3 className="text-base font-bold text-gray-900 mb-3">
-                Offer ที่ส่งไปแล้ว ({offers.length})
+                {acceptedOffer ? "คนขับที่รับงานนี้" : `Offer ที่ส่งไปแล้ว (${offers.length})`}
               </h3>
 
               {offersLoading ? (
                 <p className="text-sm text-gray-400 py-4 text-center">กำลังโหลด...</p>
+              ) : acceptedOffer ? (
+                <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-gray-100 bg-gray-50/60">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-11 h-11 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                      {acceptedDriver ? initialsOf(acceptedDriver.fullName) : "?"}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-gray-900 truncate">
+                        {acceptedDriver?.fullName ?? "กำลังโหลด..."}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {acceptedDriver
+                          ? `เลขใบขับขี่ ${acceptedDriver.licenseNo} · ${
+                              VEHICLE_TYPE_LABELS[acceptedDriver.carType] ?? acceptedDriver.carType
+                            }`
+                          : ""}
+                      </p>
+                      {acceptedDriver?.phone && (
+                        <p className="text-xs text-gray-400">{acceptedDriver.phone}</p>
+                      )}
+                    </div>
+                  </div>
+                  {acceptedDriver && (
+                    <div className="text-center flex-shrink-0">
+                      <p className="text-2xl font-black text-emerald-600">
+                        {acceptedDriver.currentScore}
+                      </p>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-wide">คะแนนขับขี่</p>
+                    </div>
+                  )}
+                </div>
               ) : offers.length === 0 ? (
                 <p className="text-sm text-gray-400 py-4 text-center">ยังไม่มี offer ที่ส่งไป</p>
               ) : (
