@@ -23,7 +23,7 @@ const ADMIN_ROLES = ["admin", "shipper"];
 
 export default function CreateJobPage() {
   const router = useRouter();
-  const { user, token, loading } = useRequireAuth("/login/admin", ADMIN_ROLES);
+  const { user, token, loading } = useRequireAuth("/login/shipper", ADMIN_ROLES);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState("12:00:00");
 

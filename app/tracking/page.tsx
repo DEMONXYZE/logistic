@@ -58,7 +58,7 @@ const trackingRows = [
 ];
 
 export default function TrackingPage() {
-  const { user, loading } = useRequireAuth("/login/admin", ADMIN_ROLES);
+  const { user, loading } = useRequireAuth("/login/shipper", ADMIN_ROLES);
   if (loading || !user || !ADMIN_ROLES.includes(user.role)) return null;
 
   return (

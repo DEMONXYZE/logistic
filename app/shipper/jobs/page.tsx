@@ -11,7 +11,7 @@ import { JOB_STATUS_STYLES, formatJobDate } from "@/lib/job-constants";
 const ADMIN_ROLES = ["admin", "shipper"];
 
 export default function AllJobsPage() {
-  const { user, token, loading } = useRequireAuth("/login/admin", ADMIN_ROLES);
+  const { user, token, loading } = useRequireAuth("/login/shipper", ADMIN_ROLES);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
@@ -52,7 +52,7 @@ export default function AllJobsPage() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-base font-bold text-slate-800">รายการงานขนส่ง</h3>
               <Link
-                href="/admin/create-job"
+                href="/shipper/create-job"
                 className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1.5"
               >
                 <i className="fa-solid fa-plus" />

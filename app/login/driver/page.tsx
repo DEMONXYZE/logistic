@@ -123,7 +123,7 @@ export default function DriverLoginPage() {
         </div>
 
         <Link
-          href="/login/admin"
+          href="/login/shipper"
           className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-2"
         >
           <i className="fa-solid fa-user-shield text-slate-500" />

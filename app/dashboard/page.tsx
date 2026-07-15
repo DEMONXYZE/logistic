@@ -16,7 +16,7 @@ import {
 const ADMIN_ROLES = ["admin", "shipper"];
 
 export default function DashboardPage() {
-  const { user, token, loading } = useRequireAuth("/login/admin", ADMIN_ROLES);
+  const { user, token, loading } = useRequireAuth("/login/shipper", ADMIN_ROLES);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [jobsError, setJobsError] = useState<string | null>(null);
@@ -238,13 +238,13 @@ export default function DashboardPage() {
               <h3 className="text-base font-bold text-slate-800">งานขนส่งที่คุณสร้าง</h3>
               <div className="flex items-center gap-4">
                 <Link
-                  href="/admin/jobs"
+                  href="/shipper/jobs"
                   className="text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
                 >
                   ดูทั้งหมด
                 </Link>
                 <Link
-                  href="/admin/create-job"
+                  href="/shipper/create-job"
                   className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1.5 hover:scale-105 transition-all"
                 >
                   <i className="fa-solid fa-plus" />

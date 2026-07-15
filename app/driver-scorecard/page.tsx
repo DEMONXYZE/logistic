@@ -6,7 +6,7 @@ import { useRequireAuth } from "@/lib/use-require-auth";
 const ADMIN_ROLES = ["admin", "shipper"];
 
 export default function DriverScorecardPage() {
-  const { user, loading } = useRequireAuth("/login/admin", ADMIN_ROLES);
+  const { user, loading } = useRequireAuth("/login/shipper", ADMIN_ROLES);
   if (loading || !user || !ADMIN_ROLES.includes(user.role)) return null;
 
   return (
