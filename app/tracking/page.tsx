@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import AdminSidebar from "@/app/components/AdminSidebar";
 import { useRequireAuth } from "@/lib/use-require-auth";
@@ -59,7 +60,20 @@ const trackingRows = [
 
 export default function TrackingPage() {
   const { user, loading } = useRequireAuth("/login/shipper", ADMIN_ROLES);
+  
+  // 🌟 1. สร้าง State สำหรับเก็บคำค้นหาที่มุกพิมพ์
+  const [searchQuery, setSearchQuery] = useState("");
+
   if (loading || !user || !ADMIN_ROLES.includes(user.role)) return null;
+
+  // 🔍 2. ทำการกรองแถวข้อมูลด้วยชื่อหรือเบอร์โทร
+  const filteredRows = trackingRows.filter((row) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      row.name.toLowerCase().includes(query) ||
+      row.phone.includes(query)
+    );
+  });
 
   return (
     <div className="bg-[#f8f9fa] text-slate-800 h-screen w-screen flex overflow-hidden font-[family-name:var(--font-k2d)]">
@@ -77,9 +91,12 @@ export default function TrackingPage() {
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
             <div className="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl flex items-center gap-2 w-full sm:w-auto">
+              {/* 🌟 3. ผูก value และ onChange เข้ากับ State ตัวเสิร์ช */}
               <input
                 type="text"
                 placeholder="ค้นหาชื่อ / เบอร์โทร..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-transparent text-xs outline-none w-full sm:w-44"
               />
               <i className="fa-solid fa-magnifying-glass text-slate-400 text-xs flex-shrink-0" />
@@ -130,48 +147,58 @@ export default function TrackingPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                  {trackingRows.map((row) => (
-                    <tr key={row.name} className="hover:bg-slate-50/50 transition-all">
-                      <td className="p-4 pl-6">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] ${row.avatarClass}`}
-                          >
-                            {row.initials}
+                  {/* 🌟 4. เปลี่ยนมาลูปข้อมูลจากตัวแปร filteredRows ที่กรองแล้ว */}
+                  {filteredRows.length > 0 ? (
+                    filteredRows.map((row) => (
+                      <tr key={row.name} className="hover:bg-slate-50/50 transition-all">
+                        <td className="p-4 pl-6">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] ${row.avatarClass}`}
+                            >
+                              {row.initials}
+                            </div>
+                            <span className="font-bold text-slate-800">{row.name}</span>
                           </div>
-                          <span className="font-bold text-slate-800">{row.name}</span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-slate-500">{row.phone}</td>
-                      <td className="p-4 text-slate-500">{row.time}</td>
-                      <td className="p-4 text-center">
-                        <span
-                          className={`font-bold px-2.5 py-1 rounded-lg text-[11px] ${row.statusClass}`}
-                        >
-                          {row.status}
-                        </span>
-                      </td>
-                      <td className={`p-4 text-center font-bold ${row.scoreClass}`}>
-                        {row.score}
-                      </td>
-                      <td className="p-4 pr-6 text-center">
-                        {row.action.href ? (
-                          <Link
-                            href={row.action.href}
-                            className={`px-3 py-1.5 rounded-xl transition-all font-bold inline-block ${row.action.className}`}
+                        </td>
+                        <td className="p-4 text-slate-500">{row.phone}</td>
+                        <td className="p-4 text-slate-500">{row.time}</td>
+                        <td className="p-4 text-center">
+                          <span
+                            className={`font-bold px-2.5 py-1 rounded-lg text-[11px] ${row.statusClass}`}
                           >
-                            {row.action.label}
-                          </Link>
-                        ) : (
-                          <button
-                            className={`px-3 py-1.5 rounded-xl transition-all font-bold ${row.action.className}`}
-                          >
-                            {row.action.label}
-                          </button>
-                        )}
+                            {row.status}
+                          </span>
+                        </td>
+                        <td className={`p-4 text-center font-bold ${row.scoreClass}`}>
+                          {row.score}
+                        </td>
+                        <td className="p-4 pr-6 text-center">
+                          {row.action.href ? (
+                            <Link
+                              href={row.action.href}
+                              className={`px-3 py-1.5 rounded-xl transition-all font-bold inline-block ${row.action.className}`}
+                            >
+                              {row.action.label}
+                            </Link>
+                          ) : (
+                            <button
+                              className={`px-3 py-1.5 rounded-xl transition-all font-bold ${row.action.className}`}
+                            >
+                              {row.action.label}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    // 🌟 5. ถ้าเสิร์ชแล้วไม่เจอใครเลย ให้แสดงบรรทัดแจ้งเตือนคลีน ๆ
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-slate-400 font-normal">
+                        ไม่พบข้อมูลพนักงานขับรถที่คุณค้นหา
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>

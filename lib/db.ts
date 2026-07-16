@@ -24,9 +24,31 @@ export type User = {
   driver?: DriverProfile;
 };
 
+export type LlmProvider = {
+  id: number;
+  name: string;
+  base_url: string;
+  api_key?: string;
+  is_active: boolean;
+  active_model: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type LlmModel = {
+  name: string;
+};
+
 declare global {
   // eslint-disable-next-line no-var
-  var __botnoiDb: { users: User[]; revokedTokens: Set<string> } | undefined;
+  var __botnoiDb:
+    | {
+        users: User[];
+        revokedTokens: Set<string>;
+        llmProviders: LlmProvider[];
+        llmModels: LlmModel[];
+      }
+    | undefined;
 }
 
 function seedUsers(): User[] {
@@ -53,10 +75,48 @@ function seedUsers(): User[] {
   ];
 }
 
+function seedLlmProviders(): LlmProvider[] {
+  return [
+    {
+      id: 1,
+      name: "ThaiLLM",
+      base_url: "http://thaillm.or.th/api/v1",
+      is_active: false,
+      active_model: "OpenThaiGPT-ThaiLLM-8B-Instruct-v7.2",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: 2,
+      name: "ThaiLLM2",
+      base_url: "http://thaillm.or.th/api/v1",
+      is_active: true,
+      active_model: "OpenThaiGPT-ThaiLLM-8B-Instruct-v7.2",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  ];
+}
+
+function seedLlmModels(): LlmModel[] {
+  return [
+    { name: "gpt-3.5-turbo" },
+    { name: "gpt-4o" },
+    { name: "gpt-4o-mini" },
+    { name: "OpenThaiGPT-ThaiLLM-8B-Instruct-v7.2" },
+    { name: "Typhoon-S-ThaiLLM-8B-Instruct" },
+  ];
+}
+
 // Reuse across HMR reloads in dev so data survives route file edits.
 const store =
   globalThis.__botnoiDb ??
-  (globalThis.__botnoiDb = { users: seedUsers(), revokedTokens: new Set() });
+  (globalThis.__botnoiDb = {
+    users: seedUsers(),
+    revokedTokens: new Set(),
+    llmProviders: seedLlmProviders(),
+    llmModels: seedLlmModels(),
+  });
 
 export const db = store;
 
