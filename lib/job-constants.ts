@@ -26,11 +26,11 @@ export const VEHICLE_TYPE_LABELS: Record<string, string> = Object.fromEntries(
 );
 
 export const JOB_STATUS_STYLES: Record<string, string> = {
-  open: "bg-emerald-100 text-emerald-700",
-  assigned: "bg-sky-100 text-sky-700",
-  in_progress: "bg-amber-100 text-amber-700",
-  completed: "bg-slate-200 text-slate-700",
-  cancelled: "bg-rose-100 text-rose-700",
+  open: "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-200",
+  assigned: "bg-sky-50 text-sky-600 ring-1 ring-inset ring-sky-200",
+  in_progress: "bg-orange-50 text-orange-600 ring-1 ring-inset ring-orange-200",
+  completed: "bg-slate-700 text-white",
+  cancelled: "bg-rose-50 text-rose-500 ring-1 ring-inset ring-rose-200",
 };
 
 export const JOB_STATUS_LABELS: Record<string, string> = {
@@ -42,10 +42,10 @@ export const JOB_STATUS_LABELS: Record<string, string> = {
 };
 
 export const OFFER_STATUS_STYLES: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-700",
-  accepted: "bg-emerald-100 text-emerald-700",
-  rejected: "bg-rose-100 text-rose-700",
-  expired: "bg-slate-200 text-slate-600",
+  pending: "bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-200",
+  accepted: "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-200",
+  rejected: "bg-rose-50 text-rose-500 ring-1 ring-inset ring-rose-200",
+  expired: "bg-slate-100 text-slate-500",
 };
 
 export const OFFER_STATUS_LABELS: Record<string, string> = {
@@ -56,9 +56,9 @@ export const OFFER_STATUS_LABELS: Record<string, string> = {
 };
 
 export const ASSIGNMENT_STATUS_STYLES: Record<string, string> = {
-  in_progress: "bg-amber-100 text-amber-700",
-  completed: "bg-slate-200 text-slate-700",
-  cancelled: "bg-rose-100 text-rose-700",
+  in_progress: "bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-200",
+  completed: "bg-slate-700 text-white",
+  cancelled: "bg-rose-50 text-rose-500 ring-1 ring-inset ring-rose-200",
 };
 
 export const ASSIGNMENT_STATUS_LABELS: Record<string, string> = {

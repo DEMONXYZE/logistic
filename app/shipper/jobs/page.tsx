@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import * as PopoverPrimitive from "@radix-ui/react-popover";
 import AdminSidebar from "@/app/components/AdminSidebar";
 import { NotificationBell } from "@/app/components/NotificationBell";
 import { useRequireAuth } from "@/lib/use-require-auth";
@@ -18,6 +19,104 @@ import {
 const ADMIN_ROLES = ["admin", "shipper"];
 
 const STATUS_FILTER_OPTIONS = ["all", "open", "assigned", "in_progress", "completed", "cancelled"];
+
+function AdvancedFilterPopover({
+  statusFilter,
+  setStatusFilter,
+  dateSort,
+  setDateSort,
+}: {
+  statusFilter: string;
+  setStatusFilter: (v: string) => void;
+  dateSort: "newest" | "oldest";
+  setDateSort: (v: "newest" | "oldest") => void;
+}) {
+  const isActive = statusFilter !== "all" || dateSort !== "newest";
+
+  return (
+    <PopoverPrimitive.Root>
+      <PopoverPrimitive.Trigger asChild>
+        <button
+          type="button"
+          className={`relative text-xs font-semibold px-3 py-1.5 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 border ${
+            isActive
+              ? "border-[#E63946]/40 text-[#E63946] bg-[#E63946]/5"
+              : "border-slate-200 text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          <i className="fa-solid fa-arrow-down-wide-short" /> ตัวกรองขั้นสูง
+          {isActive && (
+            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#E63946]" />
+          )}
+        </button>
+      </PopoverPrimitive.Trigger>
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Content
+          align="end"
+          sideOffset={8}
+          className="z-50 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-lg outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 space-y-4"
+        >
+          <div className="space-y-1.5">
+            <p className="text-[11px] font-bold text-slate-400 uppercase">สถานะ</p>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="text-xs font-bold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_FILTER_OPTIONS.map((status) => (
+                  <SelectItem key={status} value={status} className="text-xs font-bold">
+                    {status === "all" ? "ทุกสถานะ" : JOB_STATUS_LABELS[status] ?? status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="text-[11px] font-bold text-slate-400 uppercase">เรียงตามวันที่</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setDateSort("newest")}
+                className={`text-xs font-bold px-2 py-1.5 rounded-lg border transition-all ${
+                  dateSort === "newest"
+                    ? "border-[#E63946] text-[#E63946] bg-[#E63946]/5"
+                    : "border-slate-200 text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                ใหม่สุดก่อน
+              </button>
+              <button
+                type="button"
+                onClick={() => setDateSort("oldest")}
+                className={`text-xs font-bold px-2 py-1.5 rounded-lg border transition-all ${
+                  dateSort === "oldest"
+                    ? "border-[#E63946] text-[#E63946] bg-[#E63946]/5"
+                    : "border-slate-200 text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                เก่าสุดก่อน
+              </button>
+            </div>
+          </div>
+
+          {isActive && (
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter("all");
+                setDateSort("newest");
+              }}
+              className="text-xs font-bold text-slate-400 hover:text-slate-700 flex items-center gap-1"
+            >
+              <i className="fa-solid fa-rotate-left" /> ล้างตัวกรอง
+            </button>
+          )}
+        </PopoverPrimitive.Content>
+      </PopoverPrimitive.Portal>
+    </PopoverPrimitive.Root>
+  );
+}
 
 // 🎨 WeMove design system — สโคปเฉพาะหน้านี้เท่านั้น (เหมือน dashboard)
 const WEMOVE_STATUS_STYLES: Record<string, string> = {
@@ -85,26 +184,12 @@ export default function AllJobsPage() {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
               <h3 className="text-base font-bold text-slate-800">รายการงานขนส่ง</h3>
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setDateSort((s) => (s === "newest" ? "oldest" : "newest"))}
-                  className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:border-[#E63946]/40 hover:text-[#E63946] flex items-center gap-1.5 transition-colors whitespace-nowrap"
-                >
-                  <i className={`fa-solid ${dateSort === "newest" ? "fa-arrow-down-short-wide" : "fa-arrow-up-short-wide"}`} />
-                  {dateSort === "newest" ? "ใหม่สุดก่อน" : "เก่าสุดก่อน"}
-                </button>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40 text-xs font-bold">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STATUS_FILTER_OPTIONS.map((status) => (
-                      <SelectItem key={status} value={status} className="text-xs font-bold">
-                        {status === "all" ? "ทุกสถานะ" : JOB_STATUS_LABELS[status] ?? status}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <AdvancedFilterPopover
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  dateSort={dateSort}
+                  setDateSort={setDateSort}
+                />
                 <Link
                   href="/shipper/create-job"
                   className="text-xs font-bold text-[#E63946] hover:text-[#C62839] flex items-center gap-1.5 whitespace-nowrap"

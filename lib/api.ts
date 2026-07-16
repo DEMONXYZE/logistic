@@ -151,6 +151,51 @@ export function listDrivers(token: string) {
   }) as Promise<Driver[]>;
 }
 
+export function getDriverById(token: string, id: string) {
+  return apiFetch<Driver>(`/api/v1/drivers/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }) as Promise<Driver>;
+}
+
+export type DriverScore = {
+  id: string;
+  driver_id: string;
+  call_log_id: string;
+  sentiment_score: number;
+  readiness_score: number;
+  overall_score: number;
+  is_risk: boolean;
+  scored_at: string;
+  updated_at: string;
+};
+
+export function listDriverScores(token: string, driverId: string) {
+  return apiFetch<DriverScore[]>(`/api/v1/scoring/drivers/${driverId}/scores`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }) as Promise<DriverScore[]>;
+}
+
+export type CallLog = {
+  id: string;
+  driver_id: string;
+  phone_number: string;
+  conversation_log: string;
+  audio_url: string;
+  call_status: string;
+  call_duration_sec: number;
+  botnoi_outbound_id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export function listCallLogs(token: string, params?: { page?: number; limit?: number }) {
+  const entries = Object.entries(params ?? {}).map(([k, v]) => [k, String(v)]);
+  const query = entries.length > 0 ? `?${new URLSearchParams(entries).toString()}` : "";
+  return apiFetch<CallLog[]>(`/api/v1/voice/calls${query}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }) as Promise<CallLog[]>;
+}
+
 export type JobOffer = {
   id: string;
   jobId: string;
@@ -243,6 +288,51 @@ export function getDeliveryTimeline(token: string, assignmentId: string) {
   return apiFetch<DeliveryEvent[]>(`/api/v1/job-assignments/${assignmentId}/deliveries`, {
     headers: { Authorization: `Bearer ${token}` },
   }) as Promise<DeliveryEvent[]>;
+}
+
+export type LLMProvider = {
+  id: number;
+  name: string;
+  base_url: string;
+  is_active: boolean;
+  active_model: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export function listLLMProviders(token: string) {
+  return apiFetch<{ providers: LLMProvider[] }>("/api/v1/llm/providers", {
+    headers: { Authorization: `Bearer ${token}` },
+  }) as Promise<{ providers: LLMProvider[] }>;
+}
+
+export function createLLMProvider(
+  token: string,
+  payload: { name: string; base_url: string; api_key: string }
+) {
+  return apiFetch<null>("/api/v1/llm/providers", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function listLLMModels(token: string, providerId?: number) {
+  const query = providerId ? `?provider_id=${providerId}` : "";
+  return apiFetch<{ models: string[] }>(`/api/v1/llm/models${query}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }) as Promise<{ models: string[] }>;
+}
+
+export function updateLLMConfig(
+  token: string,
+  payload: { provider_id: number; active_model: string }
+) {
+  return apiFetch<null>("/api/v1/llm/config", {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
 }
 
 export function register(payload: RegisterPayload) {
