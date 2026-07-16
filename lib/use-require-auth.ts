@@ -8,7 +8,7 @@ export function homeForRole(role: string | undefined) {
   return role === "driver" ? "/driver/jobs" : "/dashboard";
 }
 
-export function useRequireAuth(redirectTo: string = "/login/admin", allowedRoles?: string[]) {
+export function useRequireAuth(redirectTo: string = "/login/shipper", allowedRoles?: string[]) {
   const { user, token, loading } = useAuth();
   const router = useRouter();
 

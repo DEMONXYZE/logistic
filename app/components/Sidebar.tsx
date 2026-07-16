@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+
+const COLLAPSED_KEY = "wemove_sidebar_collapsed";
 
 export type NavItem = {
   href: string;
@@ -31,7 +33,26 @@ export default function Sidebar({ navItems, sectionLabel, logoutRedirect }: Side
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
+  const [animationReady, setAnimationReady] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(COLLAPSED_KEY);
+    if (stored !== null) setCollapsed(stored === "true");
+    // Apply the restored width instantly (no transition) on this page load,
+    // then re-enable the transition on the next frame so it still animates
+    // when the user actually clicks the toggle button afterwards.
+    const id = requestAnimationFrame(() => setAnimationReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  function toggleCollapsed() {
+    setCollapsed((c) => {
+      const next = !c;
+      localStorage.setItem(COLLAPSED_KEY, String(next));
+      return next;
+    });
+  }
 
   async function handleLogout() {
     await logout();
@@ -40,14 +61,14 @@ export default function Sidebar({ navItems, sectionLabel, logoutRedirect }: Side
 
   return (
     <aside
-      className={`${
-        collapsed ? "w-20" : "w-72"
-      } bg-white border-r border-slate-200/80 flex flex-col h-screen flex-shrink-0 z-10 transition-all duration-200`}
+      className={`${collapsed ? "w-20" : "w-72"} ${
+        animationReady ? "transition-all duration-200" : ""
+      } bg-white border-r border-slate-200/80 flex flex-col h-screen flex-shrink-0 z-10`}
     >
       <div className="flex-grow overflow-y-auto overflow-x-hidden">
         <div className="p-4 border-b border-slate-100 flex items-center gap-3 sticky top-0 bg-white z-10">
           <button
-            onClick={() => setCollapsed((c) => !c)}
+            onClick={toggleCollapsed}
             title={collapsed ? "ขยายเมนู" : "ย่อเมนู"}
             className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-all"
           >

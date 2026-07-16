@@ -116,11 +116,11 @@ export default function DriverMyJobsPage() {
           )}
 
           {rowsLoading ? (
-            <p className="text-sm text-gray-400 py-10 text-center">กำลังโหลด...</p>
+            <p className="text-sm text-slate-400 py-10 text-center">กำลังโหลด...</p>
           ) : rowsError ? (
             <p className="text-sm text-rose-500 py-10 text-center">{rowsError}</p>
           ) : rows.length === 0 ? (
-            <p className="text-sm text-gray-400 py-10 text-center">ยังไม่มีงานที่รับไว้</p>
+            <p className="text-sm text-slate-400 py-10 text-center">ยังไม่มีงานที่รับไว้</p>
           ) : (
             <div className="grid gap-6">
               {rows.map(({ assignment, job, timeline }) => {
@@ -128,50 +128,60 @@ export default function DriverMyJobsPage() {
                 return (
                   <div
                     key={assignment.id}
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-6"
+                    className="bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-6"
                   >
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">
+                    {/* หัวการ์ด: badge สถานะ + เส้นทาง + ราคา */}
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 border-b border-slate-100 pb-4 mb-4">
+                      <div className="space-y-2 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg">
                             {job?.title ?? "งานขนส่ง"}
                           </span>
                           <span
-                            className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                              ASSIGNMENT_STATUS_STYLES[assignment.status] ?? "bg-gray-100 text-gray-600"
+                            className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
+                              ASSIGNMENT_STATUS_STYLES[assignment.status] ?? "bg-slate-100 text-slate-600"
                             }`}
                           >
                             {ASSIGNMENT_STATUS_LABELS[assignment.status] ?? assignment.status}
                           </span>
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900">
+                        <h2 className="text-xl font-bold text-slate-800">
                           {job ? `${job.pickupLocation} → ${job.dropoffLocation}` : "-"}
                         </h2>
-                        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500">
-                          <div>
-                            📦 ประเภท:{" "}
-                            <span className="text-gray-700">
-                              {job ? CARGO_TYPE_LABELS[job.cargoType] ?? job.cargoType : "-"}
-                            </span>
-                          </div>
-                          <div>
-                            📅 วันเดินทาง:{" "}
-                            <span className="text-gray-700">
-                              {job ? formatJobDateTime(job.jobDatetime) : "-"}
-                            </span>
-                          </div>
-                        </div>
                       </div>
 
-                      <div className="text-left md:text-right">
-                        <p className="text-xs text-gray-400 uppercase tracking-wider">ค่าจ้างเที่ยวนี้</p>
-                        <p className="text-2xl font-black text-red-600">
+                      <div className="text-left md:text-right flex-shrink-0">
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                          ค่าจ้างเที่ยวนี้
+                        </p>
+                        <p className="text-2xl font-black text-[#E63946] whitespace-nowrap">
                           {job?.price ? `${job.price.toLocaleString()} บาท` : "-"}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-5 pt-5 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    {/* ข้อมูลงาน: กรอบมีหัวข้อ แบบเดียวกับ dashboard */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                      <div className="space-y-1">
+                        <p className="text-[11px] font-semibold text-slate-400 uppercase">
+                          ประเภทสินค้า
+                        </p>
+                        <p className="text-sm font-bold text-slate-700">
+                          {job ? CARGO_TYPE_LABELS[job.cargoType] ?? job.cargoType : "-"}
+                        </p>
+                      </div>
+                      <div className="space-y-1 sm:border-l sm:border-slate-100 sm:pl-4">
+                        <p className="text-[11px] font-semibold text-slate-400 uppercase">
+                          วันเดินทาง
+                        </p>
+                        <p className="text-sm font-bold text-slate-700">
+                          {job ? formatJobDateTime(job.jobDatetime) : "-"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* timeline สถานะ + ปุ่มอัปเดต */}
+                    <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="flex items-center gap-2 flex-wrap">
                         {DELIVERY_STATUS_STEPS.map((step) => {
                           const done = timeline.some((e) => e.status === step.value);
@@ -179,7 +189,7 @@ export default function DriverMyJobsPage() {
                             <span
                               key={step.value}
                               className={`text-[11px] font-bold px-3 py-1 rounded-lg whitespace-nowrap ${
-                                done ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-400"
+                                done ? "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-200" : "bg-slate-100 text-slate-400"
                               }`}
                             >
                               {done ? "✓ " : ""}
@@ -193,7 +203,7 @@ export default function DriverMyJobsPage() {
                         <button
                           onClick={() => handleAdvance(assignment.id, upcoming)}
                           disabled={updatingId === assignment.id}
-                          className="bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-all whitespace-nowrap"
+                          className="bg-[#E63946] hover:bg-[#C62839] disabled:opacity-60 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition-all whitespace-nowrap"
                         >
                           {updatingId === assignment.id
                             ? "กำลังอัปเดต..."

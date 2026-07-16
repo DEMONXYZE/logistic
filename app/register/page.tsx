@@ -56,7 +56,7 @@ export default function RegisterPage() {
       });
       setSuccess(true);
       setTimeout(() => {
-        router.push(role === "driver" ? "/login/driver" : "/login/admin");
+        router.push(role === "driver" ? "/login/driver" : "/login/shipper");
       }, 1500);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
@@ -246,7 +246,7 @@ export default function RegisterPage() {
         </div>
 
         <Link
-          href="/login/admin"
+          href="/login/shipper"
           className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-2"
         >
           มีบัญชีอยู่แล้ว? เข้าสู่ระบบ
